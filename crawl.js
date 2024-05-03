@@ -1,17 +1,18 @@
 import jsdom from "jsdom";
 const { JSDOM } = jsdom;
 
-const removeTrailingSlash = (url) => {
-  return url.endsWith("/") ? url.slice(0, -1) : url;
-};
-
-export const normalizeURL = ({ url = "" }) => {
-  const urlObject = new URL(url);
-  const hostname = urlObject.hostname;
-  const pathname = urlObject.pathname;
-  const normalizedUrl = `${hostname}${pathname}`;
-
-  return removeTrailingSlash(normalizedUrl);
+export const crawlPage = async (url) => {
+  return fetch(url)
+    .then((response) => {
+      if (response.ok) {
+        return response.text();
+      } else {
+        throw new Error(`Failed to fetch page: ${url}`);
+      }
+    })
+    .catch((err) => {
+      console.log(err.message);
+    });
 };
 
 export const getURLsFromHTML = (html, baseURL) => {
@@ -34,4 +35,17 @@ export const getURLsFromHTML = (html, baseURL) => {
   }
 
   return urls;
+};
+
+const removeTrailingSlash = (url) => {
+  return url.endsWith("/") ? url.slice(0, -1) : url;
+};
+
+export const normalizeURL = ({ url = "" }) => {
+  const urlObject = new URL(url);
+  const hostname = urlObject.hostname;
+  const pathname = urlObject.pathname;
+  const normalizedUrl = `${hostname}${pathname}`;
+
+  return removeTrailingSlash(normalizedUrl);
 };
