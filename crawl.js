@@ -34,6 +34,4 @@ export const getURLsFromHTML = (html, baseURL) => {
   }
 
   return urls;
-
-  return urls;
 };
