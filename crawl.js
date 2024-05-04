@@ -1,18 +1,33 @@
 import jsdom from "jsdom";
 const { JSDOM } = jsdom;
 
-export const crawlPage = async (url) => {
-  return fetch(url)
-    .then((response) => {
-      if (response.ok) {
-        return response.text();
-      } else {
-        throw new Error(`Failed to fetch page: ${url}`);
-      }
-    })
-    .catch((err) => {
-      console.log(err.message);
-    });
+const BASE_URL = "https://wagslane.dev";
+
+export const crawlPage = async (currentURL = BASE_URL) => {
+  console.log(`>>> Crawling ${currentURL}`);
+  try {
+    const response = await fetch(currentURL);
+    const headers = response.headers;
+    const contentType = headers.get("content-type");
+
+    if (!response.ok) {
+      console.log(`${response.status} Error fetching page: ${currentURL}
+      ${response.statusText}`);
+      return;
+    }
+
+    if (!contentType || !contentType.includes("text/html")) {
+      console.log(`Error: received non-HTML response when fetching: ${currentURL}
+      Received content-type: ${contentType}`);
+      return;
+    }
+
+    const html = await response.text();
+    console.log(`>>> HTML of ${currentURL}:
+    ${html}`);
+  } catch (err) {
+    console.log(`${err.message} crawling page: ${currentURL}`);
+  }
 };
 
 export const getURLsFromHTML = (html, baseURL) => {

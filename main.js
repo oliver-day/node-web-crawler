@@ -1,6 +1,8 @@
 import { argv } from "node:process";
 
-const main = () => {
+import { crawlPage } from "./crawl.js";
+
+const main = async () => {
   if (argv.length < 3) {
     console.log("Error: no base_url argument was provided");
     return;
@@ -12,7 +14,8 @@ const main = () => {
   }
 
   const baseURL = argv[2];
-  console.log(`Starting web crawler at baseURL: ${baseURL}...`);
+  console.log(`>>> Starting web crawler at baseURL: ${baseURL}...`);
+  await crawlPage(baseURL);
 };
 
 main();
