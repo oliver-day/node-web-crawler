@@ -3,8 +3,47 @@ const { JSDOM } = jsdom;
 
 const BASE_URL = "https://wagslane.dev";
 
-export const crawlPage = async (currentURL = BASE_URL) => {
+export const crawlPage = async ({
+  baseUrl = BASE_URL,
+  currentURL = baseUrl,
+  pages = {},
+}) => {
+  const baseUrlObject = new URL(baseUrl);
+  const currentUrlObject = new URL(currentURL);
+  if (baseUrlObject.hostname !== currentUrlObject.hostname) {
+    console.log(">>> Not crawling external URL: ${currentURL}");
+    return pages;
+  }
+
+  const normalizedUrl = normalizeURL({ url: currentURL });
+  if (pages[normalizedUrl] > 0) {
+    console.log(`>>> Already crawled ${currentURL}`);
+    pages[normalizedUrl] += 1;
+    return pages;
+  } else {
+    // initialize this page in the map
+    // since it doesn't exist yet
+    pages[normalizedUrl] = 1;
+  }
   console.log(`>>> Crawling ${currentURL}`);
+  let html = "";
+  try {
+    html = await fetchHTML({ currentURL });
+  } catch (err) {
+    console.log(`${err.message}`);
+    return pages;
+  }
+
+  // recur through the page's links
+  const nextURLs = getURLsFromHTML(html, baseUrl);
+  for (const nextURL of nextURLs) {
+    pages = await crawlPage({ baseUrl, currentURL: nextURL, pages });
+  }
+
+  return pages;
+};
+
+const fetchHTML = async ({ currentURL }) => {
   try {
     const response = await fetch(currentURL);
     const headers = response.headers;
@@ -25,6 +64,7 @@ export const crawlPage = async (currentURL = BASE_URL) => {
     const html = await response.text();
     console.log(`>>> HTML of ${currentURL}:
     ${html}`);
+    return html;
   } catch (err) {
     console.log(`${err.message} crawling page: ${currentURL}`);
   }

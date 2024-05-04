@@ -15,7 +15,8 @@ const main = async () => {
 
   const baseURL = argv[2];
   console.log(`>>> Starting web crawler at baseURL: ${baseURL}...`);
-  await crawlPage(baseURL);
+  const pages = await crawlPage({ baseURL });
+  console.log(`>>> Finished crawling ${Object.keys(pages).length} pages`);
 };
 
 main();
